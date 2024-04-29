@@ -12,39 +12,34 @@ func main() {
 	}
 	defer cleanup()
 
-	output := generateOutput()
-
-	show(output)
+	show(generateOutput())
 
 	waitForInput()
 }
 
 func generateOutput() string {
-	output := `# #
-   
- # `
-
-	return output
+	return `
+#_#
+___
+_#_`
 }
 
 func gridFromString(s string) [][]rune {
 	// Split the input into individual lines
 	lines := strings.Split(s, "\n")
 
-	// Calculate the number of rows and columns
-	rows := len(lines)
-	columns := len(lines[0])
+	lines = lines[1:]
 
 	// Pre-allocate a two-dimensional slice of runes
-	grid := make([][]rune, rows)
+	grid := make([][]rune, len(lines))
 	for i := range grid {
-		grid[i] = make([]rune, columns) // Pre-allocate each row
+		grid[i] = make([]rune, len(lines[0])) // Pre-allocate each row
 	}
 
 	// Populate the two-dimensional slice of runes
 	for i, line := range lines {
-		runeRow := []rune(line) // Convert each line to a slice of runes
-		copy(grid[i], runeRow)  // Copy the slice of runes to the pre-allocated row
+		row := []rune(line) // Convert each line to a slice of runes
+		copy(grid[i], row)  // Copy the slice of runes to the pre-allocated row
 	}
 
 	return grid
@@ -73,9 +68,9 @@ func showGrid(grid [][]rune) {
 	fg := termbox.ColorDefault
 	bg := termbox.ColorDefault
 
-	for i := range grid {
-		for j := range grid[i] {
-			termbox.SetCell(i, j, grid[i][j], fg, bg)
+	for rowNum := range grid {
+		for colNum := range grid[rowNum] {
+			termbox.SetCell(colNum, rowNum, grid[rowNum][colNum], fg, bg) // SetCell is col, row
 		}
 	}
 
