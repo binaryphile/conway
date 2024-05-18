@@ -1,20 +1,13 @@
 package main
 
 import (
-	"github.com/nsf/termbox-go"
-	"strings"
+	"github.com/binaryphile/conway/tbox"
 )
 
 func main() {
-	cleanup, err := initialize()
-	if err != nil {
-		panic(err)
-	}
-	defer cleanup()
-
-	show(generateOutput())
-
-	waitForInput()
+	termbox := newTermbox()
+	defer termbox.Close()
+	run(termbox)
 }
 
 func generateOutput() string {
@@ -24,63 +17,19 @@ ___
 _#_`
 }
 
-func gridFromString(s string) [][]rune {
-	// Split the input into individual lines
-	lines := strings.Split(s, "\n")
+func newTermbox() tbox.Adapter {
+	termbox := tbox.Adapter{}
+	err := termbox.Init()
+	tbox.AssertNil(err)
 
-	lines = lines[1:]
+	termbox.SetInputMode(tbox.InputEsc)
+	err = termbox.Clear(tbox.ColorDefault, tbox.ColorDefault)
+	tbox.AssertNil(err)
 
-	// Pre-allocate a two-dimensional slice of runes
-	grid := make([][]rune, len(lines))
-	for i := range grid {
-		grid[i] = make([]rune, len(lines[0])) // Pre-allocate each row
-	}
-
-	// Populate the two-dimensional slice of runes
-	for i, line := range lines {
-		row := []rune(line) // Convert each line to a slice of runes
-		copy(grid[i], row)  // Copy the slice of runes to the pre-allocated row
-	}
-
-	return grid
+	return termbox
 }
 
-func initialize() (_ func(), err error) {
-	err = termbox.Init()
-	if err != nil {
-		return
-	}
-
-	termbox.SetInputMode(termbox.InputEsc)
-	err = termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	if err != nil {
-		return
-	}
-
-	return termbox.Close, nil
-}
-
-func show(output string) {
-	showGrid(gridFromString(output))
-}
-
-func showGrid(grid [][]rune) {
-	fg := termbox.ColorDefault
-	bg := termbox.ColorDefault
-
-	for rowNum := range grid {
-		for colNum := range grid[rowNum] {
-			termbox.SetCell(colNum, rowNum, grid[rowNum][colNum], fg, bg) // SetCell is col, row
-		}
-	}
-
-	termbox.Flush()
-}
-
-func waitForInput() {
-	for {
-		if event := termbox.PollEvent(); event.Type == termbox.EventKey {
-			break
-		}
-	}
+func run(termbox tbox.Termbox) {
+	termbox.Show(generateOutput())
+	termbox.WaitForInput()
 }

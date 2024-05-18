@@ -1,4 +1,4 @@
-module conway
+module github.com/binaryphile/conway
 
 go 1.21
 
