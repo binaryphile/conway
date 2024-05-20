@@ -1,6 +1,7 @@
-package tbox
+package userinterface
 
 import (
+	"github.com/binaryphile/conway/must"
 	"github.com/nsf/termbox-go"
 )
 
@@ -14,21 +15,17 @@ type Termbox interface {
 	SetInputMode(termbox.InputMode) termbox.InputMode
 }
 
-type Tbox struct {
+type TermboxUI struct {
 	termbox Termbox
 }
 
-func NewTbox(termbox Termbox) Tbox {
-	return Tbox{
+func NewTermboxUI(termbox Termbox) TermboxUI {
+	return TermboxUI{
 		termbox: termbox,
 	}
 }
 
-func (t Tbox) Show(output string) {
-	t.showGrid(gridFromString(output))
-}
-
-func (t Tbox) WaitForInput() {
+func (t TermboxUI) WaitForInput() {
 	for {
 		if event := t.termbox.PollEvent(); event.Type == EventKey {
 			break
@@ -36,13 +33,7 @@ func (t Tbox) WaitForInput() {
 	}
 }
 
-func AssertNil(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (t Tbox) showGrid(grid [][]rune) {
+func (t TermboxUI) Show(grid [][]rune) {
 	fg := ColorDefault
 	bg := ColorDefault
 
@@ -53,5 +44,5 @@ func (t Tbox) showGrid(grid [][]rune) {
 	}
 
 	err := termbox.Flush()
-	AssertNil(err)
+	must.AssertNil(err)
 }

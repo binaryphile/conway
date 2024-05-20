@@ -1,35 +1,61 @@
 package main
 
 import (
-	"github.com/binaryphile/conway/tbox"
+	"github.com/MakeNowJust/heredoc"
+	m "github.com/binaryphile/conway/must"
+	"github.com/binaryphile/conway/userinterface"
+	"time"
 )
 
 func main() {
-	termbox := newTermbox()
-	defer termbox.Close()
-	run(termbox)
+	app := NewApp(AppConfig{
+		termbox: NewTermboxAdapter(),
+	})
+	defer app.Close()
+	Run(app, heredoc.Doc(`
+		#_#
+		___
+		_#_
+	`))
 }
 
-func generateOutput() string {
-	return `
-#_#
-___
-_#_`
-}
-
-func newTermbox() tbox.Adapter {
-	termbox := tbox.Adapter{}
+func NewTermboxAdapter() userinterface.Adapter {
+	termbox := userinterface.Adapter{}
 	err := termbox.Init()
-	tbox.AssertNil(err)
+	m.AssertNil(err)
 
-	termbox.SetInputMode(tbox.InputEsc)
-	err = termbox.Clear(tbox.ColorDefault, tbox.ColorDefault)
-	tbox.AssertNil(err)
+	termbox.SetInputMode(userinterface.InputEsc)
+	err = termbox.Clear(userinterface.ColorDefault, userinterface.ColorDefault)
+	m.AssertNil(err)
 
 	return termbox
 }
 
-func run(termbox tbox.Termbox) {
-	termbox.Show(generateOutput())
-	termbox.WaitForInput()
+func Run(app App, initialState string) {
+	ui := userinterface.NewTermboxUI(app.termbox)
+
+	ticker := app.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	done := make(chan struct{})
+	go func() {
+		ui.WaitForInput()
+		close(done)
+	}()
+
+	var state State
+	nextState := NewStateIterator(initialState, newState)
+	for {
+		select {
+		case <-ticker.C():
+			state, nextState = nextState()
+			ui.Show(state.Grid())
+		case <-done:
+			return
+		}
+	}
+}
+
+func newState(s State) State {
+	return s
 }
