@@ -4,7 +4,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/binaryphile/conway/userinterface"
 	m "github.com/binaryphile/must"
-	"time"
 )
 
 func main() {
@@ -12,7 +11,7 @@ func main() {
 		termbox: NewTermboxAdapter(),
 	})
 	defer app.Close()
-	Run(app, heredoc.Doc(`
+	app.Run(heredoc.Doc(`
 		#_#
 		___
 		_#_
@@ -29,31 +28,6 @@ func NewTermboxAdapter() userinterface.Adapter {
 	m.AssertNil(err)
 
 	return termbox
-}
-
-func Run(app App, initialState string) {
-	ui := userinterface.NewTermboxUI(app.termbox)
-
-	tickerChan, tickerStop := app.tickerChanFactory(1 * time.Second)
-	defer tickerStop()
-
-	done := make(chan struct{})
-	go func() {
-		ui.WaitForInput()
-		close(done)
-	}()
-
-	var state State
-	nextState := NewStateIterator(initialState, newState)
-	for {
-		select {
-		case <-tickerChan:
-			state, nextState = nextState()
-			ui.Show(state.Grid())
-		case <-done:
-			return
-		}
-	}
 }
 
 func newState(s State) State {

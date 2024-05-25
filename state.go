@@ -6,7 +6,7 @@ import (
 )
 
 type State [][]bool
-type StateIterator = iterator.Iter[State]
+type StateIterator = iterator.Iterator[State]
 
 func StateFromString(s string) State {
 	// Split the input string by newlines

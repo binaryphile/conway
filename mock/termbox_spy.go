@@ -1,24 +1,25 @@
 package mock
 
 import (
-	"github.com/binaryphile/conway/iterator"
+	iter "github.com/binaryphile/conway/iterator"
 	"github.com/binaryphile/conway/ternary"
 	"github.com/nsf/termbox-go"
 	"strings"
 )
 
-type eventIterator = iterator.Iter[termbox.Event]
+type eventIterator = iter.Iterator[termbox.Event]
 
 type TermboxSpy struct {
 	gridSpy   *[][]rune
 	nextEvent eventIterator
 }
 
-func NewTermboxSpy(gridSpy *[][]rune, events []termbox.Event) *TermboxSpy {
-	If := ternary.If[iterator.Iter[termbox.Event]]
+func NewTermboxSpy(events []termbox.Event) *TermboxSpy {
+	If := ternary.If[iter.Iterator[termbox.Event]]
+	gridSpy := make([][]rune, 0)
 	return &TermboxSpy{
-		gridSpy:   gridSpy,
-		nextEvent: If(len(events) > 0).Then(iterator.FromSlice(events)).Else(nil),
+		gridSpy:   &gridSpy,
+		nextEvent: If(len(events) > 0).Then(iter.FromSlice(events)).Else(nil),
 	}
 }
 
@@ -48,7 +49,7 @@ func (s *TermboxSpy) PollEvent() termbox.Event {
 	}
 }
 
-func (s *TermboxSpy) GridString() string {
+func (s *TermboxSpy) String() string {
 	if s.gridSpy == nil || len(*s.gridSpy) == 0 {
 		return ""
 	}
@@ -63,7 +64,9 @@ func (s *TermboxSpy) GridString() string {
 	return "\n" + b.String()
 }
 
-func (s *TermboxSpy) SetCell(_, _ int, _ rune, _, _ termbox.Attribute) {}
+func (s *TermboxSpy) SetCell(x, y int, ch rune, _, _ termbox.Attribute) {
+	(*s.gridSpy)[x][y] = ch
+}
 
 func (s *TermboxSpy) SetInputMode(mode termbox.InputMode) termbox.InputMode {
 	return mode

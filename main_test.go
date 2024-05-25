@@ -6,6 +6,7 @@ import (
 	"github.com/binaryphile/conway/userinterface"
 	"github.com/binaryphile/must"
 	"github.com/google/go-cmp/cmp"
+	"github.com/nsf/termbox-go"
 	"testing"
 	"time"
 )
@@ -13,23 +14,29 @@ import (
 func Test_run(t *testing.T) {
 	spies := make(map[string]*mock.TermboxSpy)
 
+	type fields struct {
+		app App
+	}
+
 	type args struct {
-		app          App
 		initialState string
 	}
 
 	tests := []struct {
-		name string
-		args args
-		want string
+		name   string
+		fields fields
+		args   args
+		want   string
 	}{
 		{
 			name: "basic",
-			args: args{
+			fields: fields{
 				app: NewTestApp(TestAppConfig{
 					termbox: NewTestTermboxSpy(spies, "basic"),
 					ticks:   5,
 				}),
+			},
+			args: args{
 				initialState: heredoc.Doc(`
 					#_#
 					___
@@ -46,8 +53,8 @@ func Test_run(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Run(tt.args.app, tt.args.initialState)
-			got := spies[tt.name].GridString()
+			tt.fields.app.Run(tt.args.initialState)
+			got := spies[tt.name].String()
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("run() mismatch (- expected, + actual):\n%s", diff)
 			}
@@ -56,8 +63,7 @@ func Test_run(t *testing.T) {
 }
 
 func NewTestTermboxSpy(spies map[string]*mock.TermboxSpy, name string) *mock.TermboxSpy {
-	var gridSpy [][]rune
-	spy := mock.NewTermboxSpy(&gridSpy, nil)
+	spy := mock.NewTermboxSpy(NewKeyEvents("a"))
 	spies[name] = spy
 
 	return spy
@@ -70,8 +76,8 @@ type TestAppConfig struct {
 
 func NewTestApp(c TestAppConfig) App {
 	return App{
-		termbox:           c.termbox,
-		tickerChanFactory: NewTestTickerChanFactory(c.ticks),
+		termbox:       c.termbox,
+		newTickerChan: NewTestTickerChanFactory(c.ticks),
 	}
 }
 
@@ -87,4 +93,27 @@ func NewTestTickerChanFactory(ticks int) TickerChanFactory {
 
 		return tickerChan, func() {}
 	}
+}
+
+func NewKeyEvents(s string) []termbox.Event {
+	return sliceToEvent(s).Map(NewKeyEvent)
+}
+
+func NewKeyEvent(key rune) termbox.Event {
+	return termbox.Event{
+		Type: termbox.EventKey,
+		Ch:   key,
+	}
+}
+
+type sliceToEvent []rune
+
+func (ts sliceToEvent) Map(fn func(rune) termbox.Event) []termbox.Event {
+	results := make([]termbox.Event, len(ts))
+
+	for i, t := range ts {
+		results[i] = fn(t)
+	}
+
+	return results
 }
