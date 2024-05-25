@@ -1,8 +1,8 @@
 package mock
 
 import (
-	iter "github.com/binaryphile/conway/iterator"
 	"github.com/binaryphile/conway/ternary"
+	iter "github.com/binaryphile/iterator"
 	"github.com/nsf/termbox-go"
 	"strings"
 )

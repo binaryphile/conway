@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/binaryphile/conway/iterator"
+	iter "github.com/binaryphile/iterator"
 	"strings"
 )
 
 type State [][]bool
-type StateIterator = iterator.Iterator[State]
+type StateIterator = iter.Iterator[State]
 
 func StateFromString(s string) State {
 	// Split the input string by newlines

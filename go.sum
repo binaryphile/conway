@@ -1,9 +1,9 @@
 github.com/MakeNowJust/heredoc v1.0.0 h1:cXCdzVdstXyiTqTvfqk9SDHpKNjxuom+DOlyEeQ4pzQ=
 github.com/MakeNowJust/heredoc v1.0.0/go.mod h1:mG5amYoWBHf8vpLOuehzbGGw0EHxpZZ6lCpQ4fNJ8LE=
+github.com/binaryphile/iterator v0.0.0-20240525062254-36878ad384bd h1:TL985vEtJOL7J20a+B3GeP0B5euPKbni7QMdaDwxcE8=
+github.com/binaryphile/iterator v0.0.0-20240525062254-36878ad384bd/go.mod h1:+fSsbak0olcGSrZRXWsKjGR1GUFi6+VXrB4SgdMDcEE=
 github.com/binaryphile/must v0.0.0-20240525030636-907439380a54 h1:ZaYzxIIDC9q1G5n0+9cTK4sxR/NI1RU/cYZS4eyNWSA=
 github.com/binaryphile/must v0.0.0-20240525030636-907439380a54/go.mod h1:v/XEAj2q7w/2RFsGRde8gvQt9ZwPajOSb3ftVgOdZs0=
-github.com/binaryphile/slice v0.0.0-20240525050111-86d721cefd4c h1:griMGB5/u+FhOkCT8ZVDpBVbvb87/WA89HudTLwA9lw=
-github.com/binaryphile/slice v0.0.0-20240525050111-86d721cefd4c/go.mod h1:00HeMdWpQArD58u2qgKIAMSElSNrNp9rFKIyXkwkW3k=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/QdE+0=
