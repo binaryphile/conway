@@ -10,14 +10,14 @@ type AppConfig struct {
 }
 
 type App struct {
-	termbox       userinterface.Termbox
-	tickerFactory TickerIfaceFactory
+	termbox           userinterface.Termbox
+	tickerChanFactory func(time.Duration) (<-chan time.Time, func())
 }
 
 func NewApp(c AppConfig) App {
 	return App{
-		termbox:       c.termbox,
-		tickerFactory: NewTickerAdapterFactory(time.NewTicker),
+		termbox:           c.termbox,
+		tickerChanFactory: NewTickerChan,
 	}
 }
 
@@ -25,6 +25,6 @@ func (a App) Close() {
 	a.termbox.Close()
 }
 
-func (a App) NewTicker(duration time.Duration) TickerAdapter {
-	return a.tickerFactory(duration)
+func (a App) NewTickerChan(duration time.Duration) (<-chan time.Time, func()) {
+	return a.tickerChanFactory(duration)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/binaryphile/conway/mock"
 	"github.com/binaryphile/conway/userinterface"
+	"github.com/binaryphile/must"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 	"time"
@@ -27,7 +28,7 @@ func Test_run(t *testing.T) {
 			args: args{
 				app: NewTestApp(TestAppConfig{
 					termbox: NewTestTermboxSpy(spies, "basic"),
-					ticks:   1,
+					ticks:   5,
 				}),
 				initialState: heredoc.Doc(`
 					#_#
@@ -69,13 +70,21 @@ type TestAppConfig struct {
 
 func NewTestApp(c TestAppConfig) App {
 	return App{
-		termbox:       c.termbox,
-		tickerFactory: NewTestTickerFactory(c.ticks),
+		termbox:           c.termbox,
+		tickerChanFactory: NewTestTickerChanFactory(c.ticks),
 	}
 }
 
-func NewTestTickerFactory(ticks int) TickerIfaceFactory {
-	return func(time.Duration) TickerAdapter {
+func NewTestTickerChanFactory(ticks int) TickerChanFactory {
+	return func(duration time.Duration) (<-chan time.Time, func()) {
+		tickerChan := make(chan time.Time)
+		layout := "2006-01-02"
+		initialTime := must.Must(time.Parse(layout, "2009-03-01"))
 
+		for i := 0; i < ticks; i++ {
+			tickerChan <- initialTime.Add(time.Duration(i) * time.Second)
+		}
+
+		return tickerChan, func() {}
 	}
 }

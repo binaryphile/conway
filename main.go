@@ -34,8 +34,8 @@ func NewTermboxAdapter() userinterface.Adapter {
 func Run(app App, initialState string) {
 	ui := userinterface.NewTermboxUI(app.termbox)
 
-	ticker := app.NewTicker(1 * time.Second)
-	defer ticker.Stop()
+	tickerChan, tickerStop := app.tickerChanFactory(1 * time.Second)
+	defer tickerStop()
 
 	done := make(chan struct{})
 	go func() {
@@ -47,7 +47,7 @@ func Run(app App, initialState string) {
 	nextState := NewStateIterator(initialState, newState)
 	for {
 		select {
-		case <-ticker.C():
+		case <-tickerChan:
 			state, nextState = nextState()
 			ui.Show(state.Grid())
 		case <-done:
