@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	m "github.com/binaryphile/conway/must"
 	"github.com/binaryphile/conway/userinterface"
+	m "github.com/binaryphile/must"
 	"time"
 )
 

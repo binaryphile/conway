@@ -1,7 +1,7 @@
 package userinterface
 
 import (
-	"github.com/binaryphile/conway/must"
+	m "github.com/binaryphile/must"
 	"github.com/nsf/termbox-go"
 )
 
@@ -44,5 +44,5 @@ func (t TermboxUI) Show(grid [][]rune) {
 	}
 
 	err := termbox.Flush()
-	must.AssertNil(err)
+	m.AssertNil(err)
 }
