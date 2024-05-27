@@ -10,19 +10,10 @@ func main() {
 	app := NewApp()
 	defer app.Close()
 
-	app.Run(StateFromString(10, heredoc.Doc(`
-		_###_ 
-		#___#
-		#___#
-		_###_
-		_____
-		_____
-		_____
-		_____
-		_###_
-		#___#
-		#___#
-		_###_
+	app.Run(StateFromString(30, heredoc.Doc(`
+		#__
+		#_#
+		##_
 	`)))
 }
 
