@@ -33,7 +33,7 @@ func StateFromString(borderSize int, s string) State {
 	return state
 }
 
-// NewStateIterator returns an iterator that yields the initial state and subsequent states using newState.
+// NewStateIterator returns an iterator that yields the subsequent states using evolve.
 func NewStateIterator(state State, evolve func(State) State) StateIterator {
 	var next StateIterator
 	next = func() (State, StateIterator) {
