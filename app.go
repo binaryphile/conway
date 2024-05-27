@@ -37,6 +37,7 @@ func (a App) Run(initialState State) {
 
 	var state State
 	nextState := NewStateIterator(initialState, Evolve)
+	a.ui.Show(initialState.Grid())
 	for {
 		select {
 		case <-tickerChan:
