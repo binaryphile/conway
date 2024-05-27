@@ -42,7 +42,9 @@ func NewStateIterator(state State, evolve func(State) State) StateIterator {
 		return state, next
 	}
 
-	return next
+	return func() (State, StateIterator) {
+		return state, next
+	}
 }
 
 func (s State) Grid() [][]rune {
