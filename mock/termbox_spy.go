@@ -91,6 +91,10 @@ func NewGridSpy(c GridSpyConfig) *[][]rune {
 }
 
 func NewTestEventIterator(c TestEventIteratorConfig) EventIterator {
+	if len(c.KeyEventString) == 0 {
+		return nil
+	}
+
 	type RuneSlice = slice.OfTo[rune, termbox.Event]
 
 	events := RuneSlice(c.KeyEventString).Map(EventFromRune)
