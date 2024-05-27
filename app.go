@@ -26,7 +26,7 @@ func (a App) NewTickerChan(duration time.Duration) (<-chan time.Time, func()) {
 }
 
 func (a App) Run(initialState State) {
-	tickerChan, stopTicker := a.NewTickerChan(1 * time.Second)
+	tickerChan, stopTicker := a.NewTickerChan(500 * time.Millisecond)
 	defer stopTicker()
 
 	done := make(chan struct{})
