@@ -2,32 +2,32 @@ package userinterface
 
 import "github.com/nsf/termbox-go"
 
-type Adapter struct{}
+type TermboxAdapter struct{}
 
-func (a Adapter) Clear(fg, bg termbox.Attribute) error {
+func (a TermboxAdapter) Clear(fg, bg termbox.Attribute) error {
 	return termbox.Clear(fg, bg)
 }
 
-func (a Adapter) Close() {
+func (a TermboxAdapter) Close() {
 	termbox.Close()
 }
 
-func (a Adapter) Flush() error {
+func (a TermboxAdapter) Flush() error {
 	return termbox.Flush()
 }
 
-func (a Adapter) Init() error {
+func (a TermboxAdapter) Init() error {
 	return termbox.Init()
 }
 
-func (a Adapter) PollEvent() termbox.Event {
+func (a TermboxAdapter) PollEvent() termbox.Event {
 	return termbox.PollEvent()
 }
 
-func (a Adapter) SetCell(x, y int, ch rune, fg, bg termbox.Attribute) {
+func (a TermboxAdapter) SetCell(x, y int, ch rune, fg, bg termbox.Attribute) {
 	termbox.SetCell(x, y, ch, fg, bg)
 }
 
-func (a Adapter) SetInputMode(mode termbox.InputMode) termbox.InputMode {
+func (a TermboxAdapter) SetInputMode(mode termbox.InputMode) termbox.InputMode {
 	return termbox.SetInputMode(mode)
 }

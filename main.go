@@ -11,24 +11,23 @@ func main() {
 	defer app.Close()
 
 	app.Run(StateFromString(10, heredoc.Doc(`
-		__###___###__
-		_____________
-		#____#_#____#
-		#____#_#____#
-		#____#_#____#
-		__###___###__
-		_____________
-		__###___###__
-		#____#_#____#
-		#____#_#____#
-		#____#_#____#
-		_____________
-		__###___###__
+		_###_ 
+		#___#
+		#___#
+		_###_
+		_____
+		_____
+		_____
+		_____
+		_###_
+		#___#
+		#___#
+		_###_
 	`)))
 }
 
-func NewTermboxAdapter() userinterface.Adapter {
-	termbox := userinterface.Adapter{}
+func NewTermboxAdapter() userinterface.TermboxAdapter {
+	termbox := userinterface.TermboxAdapter{}
 	err := termbox.Init()
 	m.AssertNil(err)
 
