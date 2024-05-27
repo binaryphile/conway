@@ -11,7 +11,7 @@ type StateIterator = iter.Iterator[State]
 func StateFromString(s string) State {
 	// Split the input string by newlines
 	lines := strings.Split(s, "\n")
-	numRows := len(lines)
+	numRows := len(lines) - 1
 	numCols := len(lines[0])
 
 	// Create the State matrix with dimensions [numCols][numRows]
@@ -34,19 +34,15 @@ func StateFromString(s string) State {
 	return state
 }
 
-// Create an iterator that yields the initial state and subsequent states using newState
-func NewStateIterator(initialState string, newState func(State) State) StateIterator {
-	state := StateFromString(initialState)
-
+// NewStateIterator returns an iterator that yields the initial state and subsequent states using newState.
+func NewStateIterator(state State, evolve func(State) State) StateIterator {
 	var next StateIterator
 	next = func() (State, StateIterator) {
-		state = newState(state)
+		state = evolve(state)
 		return state, next
 	}
 
-	return func() (State, StateIterator) {
-		return state, next
-	}
+	return next
 }
 
 func (s State) Grid() [][]rune {

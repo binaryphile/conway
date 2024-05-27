@@ -25,6 +25,10 @@ func NewTermboxUI(termbox Termbox) TermboxUI {
 	}
 }
 
+func (t TermboxUI) Close() {
+	t.termbox.Close()
+}
+
 func (t TermboxUI) WaitForInput() {
 	for {
 		if event := t.termbox.PollEvent(); event.Type == EventKey {
@@ -39,10 +43,10 @@ func (t TermboxUI) Show(grid [][]rune) {
 
 	for rowNum := range grid {
 		for colNum := range grid[rowNum] {
-			termbox.SetCell(colNum, rowNum, grid[rowNum][colNum], fg, bg) // SetCell is col, row
+			t.termbox.SetCell(colNum, rowNum, grid[colNum][rowNum], fg, bg) // SetCell is col, row
 		}
 	}
 
-	err := termbox.Flush()
+	err := t.termbox.Flush()
 	m.AssertNil(err)
 }

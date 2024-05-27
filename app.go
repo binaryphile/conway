@@ -5,49 +5,43 @@ import (
 	"time"
 )
 
-type AppConfig struct {
-	termbox userinterface.Termbox
-}
-
 type App struct {
-	termbox       userinterface.Termbox
 	newTickerChan TickerChanFactory
+	ui            userinterface.TermboxUI
 }
 
-func NewApp(c AppConfig) App {
+func NewApp() App {
 	return App{
-		termbox:       c.termbox,
 		newTickerChan: NewTickerChan,
+		ui:            userinterface.NewTermboxUI(NewTermboxAdapter()),
 	}
 }
 
 func (a App) Close() {
-	a.termbox.Close()
+	a.ui.Close()
 }
 
 func (a App) NewTickerChan(duration time.Duration) (<-chan time.Time, func()) {
 	return a.newTickerChan(duration)
 }
 
-func (a App) Run(initialState string) {
-	ui := userinterface.NewTermboxUI(a.termbox)
-
-	tickerChan, tickerStop := a.newTickerChan(1 * time.Second)
-	defer tickerStop()
+func (a App) Run(initialState State) {
+	tickerChan, stopTicker := a.NewTickerChan(1 * time.Second)
+	defer stopTicker()
 
 	done := make(chan struct{})
 	go func() {
-		ui.WaitForInput()
+		a.ui.WaitForInput()
 		close(done)
 	}()
 
 	var state State
-	nextState := NewStateIterator(initialState, newState)
+	nextState := NewStateIterator(initialState, Evolve)
 	for {
 		select {
 		case <-tickerChan:
 			state, nextState = nextState()
-			ui.Show(state.Grid())
+			a.ui.Show(state.Grid())
 		case <-done:
 			return
 		}

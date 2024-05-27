@@ -7,15 +7,14 @@ import (
 )
 
 func main() {
-	app := NewApp(AppConfig{
-		termbox: NewTermboxAdapter(),
-	})
+	app := NewApp()
 	defer app.Close()
-	app.Run(heredoc.Doc(`
+
+	app.Run(StateFromString(heredoc.Doc(`
 		#_#
 		___
 		_#_
-	`))
+	`)))
 }
 
 func NewTermboxAdapter() userinterface.Adapter {
@@ -30,6 +29,6 @@ func NewTermboxAdapter() userinterface.Adapter {
 	return termbox
 }
 
-func newState(s State) State {
+func Evolve(s State) State {
 	return s
 }

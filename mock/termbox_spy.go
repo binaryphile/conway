@@ -1,25 +1,33 @@
 package mock
 
 import (
-	"github.com/binaryphile/conway/ternary"
 	iter "github.com/binaryphile/iterator"
+	"github.com/binaryphile/slice"
 	"github.com/nsf/termbox-go"
 	"strings"
+	"time"
 )
 
-type eventIterator = iter.Iterator[termbox.Event]
+type EventIterator = iter.Iterator[termbox.Event]
 
 type TermboxSpy struct {
 	gridSpy   *[][]rune
-	nextEvent eventIterator
+	nextEvent EventIterator
 }
 
-func NewTermboxSpy(events []termbox.Event) *TermboxSpy {
-	If := ternary.If[iter.Iterator[termbox.Event]]
-	gridSpy := make([][]rune, 0)
+type GridSpyConfig struct {
+	Width, Height int
+}
+
+type TestEventIteratorConfig struct {
+	KeyEventString string
+	Step           time.Duration
+}
+
+func NewTermboxSpy(gsc GridSpyConfig, kec TestEventIteratorConfig) *TermboxSpy {
 	return &TermboxSpy{
-		gridSpy:   &gridSpy,
-		nextEvent: If(len(events) > 0).Then(iter.FromSlice(events)).Else(nil),
+		gridSpy:   NewGridSpy(gsc),
+		nextEvent: NewTestEventIterator(kec),
 	}
 }
 
@@ -59,9 +67,10 @@ func (s *TermboxSpy) String() string {
 		for i := range *s.gridSpy {
 			b.WriteRune((*s.gridSpy)[i][j])
 		}
+		b.WriteRune('\n')
 	}
 
-	return "\n" + b.String()
+	return b.String()
 }
 
 func (s *TermboxSpy) SetCell(x, y int, ch rune, _, _ termbox.Attribute) {
@@ -70,4 +79,42 @@ func (s *TermboxSpy) SetCell(x, y int, ch rune, _, _ termbox.Attribute) {
 
 func (s *TermboxSpy) SetInputMode(mode termbox.InputMode) termbox.InputMode {
 	return mode
+}
+
+func NewGridSpy(c GridSpyConfig) *[][]rune {
+	gridSpy := make([][]rune, c.Width)
+	for i := range gridSpy {
+		gridSpy[i] = make([]rune, c.Height)
+	}
+
+	return &gridSpy
+}
+
+func NewTestEventIterator(c TestEventIteratorConfig) EventIterator {
+	type RuneSlice = slice.OfTo[rune, termbox.Event]
+
+	events := RuneSlice(c.KeyEventString).Map(EventFromRune)
+
+	i := 0
+	var next EventIterator
+	next = func() (termbox.Event, EventIterator) {
+		time.Sleep(c.Step)
+
+		event := events[i]
+		if i == len(events)-1 {
+			return event, nil
+		}
+		i += 1
+
+		return event, next
+	}
+
+	return next
+}
+
+func EventFromRune(key rune) termbox.Event {
+	return termbox.Event{
+		Type: termbox.EventKey,
+		Ch:   key,
+	}
 }
