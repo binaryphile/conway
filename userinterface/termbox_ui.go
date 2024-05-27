@@ -43,7 +43,7 @@ func (t TermboxUI) Show(grid [][]rune) {
 
 	for rowNum := range grid {
 		for colNum := range grid[rowNum] {
-			t.termbox.SetCell(colNum, rowNum, grid[colNum][rowNum], fg, bg) // SetCell is col, row
+			t.termbox.SetCell(rowNum, colNum, grid[rowNum][colNum], fg, bg)
 		}
 	}
 

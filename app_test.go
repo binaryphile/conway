@@ -42,7 +42,7 @@ func Test_run(t *testing.T) {
 				),
 			},
 			args: args{
-				initialState: StateFromString(heredoc.Doc(`
+				initialState: StateFromString(0, heredoc.Doc(`
 					#_#
 					___
 					_#_

@@ -8,25 +8,24 @@ import (
 type State [][]int
 type StateIterator = iter.Iterator[State]
 
-func StateFromString(s string) State {
+func StateFromString(borderSize int, s string) State {
 	// Split the input string by newlines
 	lines := strings.Split(s, "\n")
 	numRows := len(lines) - 1
 	numCols := len(lines[0])
 
-	// Create the State matrix with dimensions [numCols][numRows]
-	state := make(State, numCols)
+	state := make(State, numCols+2*borderSize)
 	for i := range state {
-		state[i] = make([]int, numRows)
+		state[i] = make([]int, numRows+2*borderSize)
 	}
 
 	// Iterate over each line and assign values to the columns of the State matrix
 	for i, line := range lines {
 		for j, char := range line {
 			if char == '#' {
-				state[j][i] = 1
+				state[j+borderSize][i+borderSize] = 1
 			} else if char == '_' {
-				state[j][i] = 0
+				state[j+borderSize][i+borderSize] = 0
 			}
 		}
 	}
@@ -58,7 +57,7 @@ func (s State) Grid() [][]rune {
 			if s[i][j] == 1 {
 				grid[i][j] = '#'
 			} else {
-				grid[i][j] = '_'
+				grid[i][j] = ' '
 			}
 		}
 	}
