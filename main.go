@@ -10,7 +10,7 @@ func main() {
 	app := NewApp()
 	defer app.Close()
 
-	app.Run(StateFromString(30, heredoc.Doc(`
+	app.Run(StateFromString(40, heredoc.Doc(`
 		_##
 		##_
 		_#_
