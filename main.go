@@ -1,87 +1,47 @@
 package main
 
 import (
-	"github.com/MakeNowJust/heredoc"
-	"github.com/binaryphile/conway/userinterface"
-	m "github.com/binaryphile/must"
+	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/hajimehoshi/ebiten/v2"
+	"log"
+	"strings"
+)
+
+const (
+	screenWidth  = 800
+	screenHeight = 600
+	cellSize     = 10
 )
 
 func main() {
-	app := NewApp()
-	defer app.Close()
-
-	app.Run(StateFromString(10, heredoc.Doc(`
-		___##____
-		___##____
-		_________
-		_________
-		_________
-		_________
-		_________
-		_________
-		_________
-		_________
-		__###____
-		_#___#___
-		#_____#__
-		#_____#__
-		___#_____
-		_#___#___
-		__###____
-		___#_____
-		_________
-		_________
-		____###__
-		____###__
-		___#___#_
-		_________
-		__##___##
-		_________
-		_________
-		_________
-		_________
-		_________
-		_________
-		_________
-		_________
-		_________
-		_____##__
-		_____##__
+	game := NewGame(screenWidth/cellSize, screenHeight/cellSize)
+	game.Initialize(10, 10, StateFromString(heredoc.Doc(`
+		_##_
+		_#_#
+		_#_
 	`)))
+
+	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowTitle("Conway's Game of Life")
+	ebiten.SetTPS(2)
+	if err := ebiten.RunGame(game); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func NewTermboxAdapter() userinterface.TermboxAdapter {
-	termbox := userinterface.TermboxAdapter{}
-	err := termbox.Init()
-	m.AssertNil(err)
+func StateFromString(s string) [][]bool {
+	lines := strings.Split(s, "\n")
+	numRows := len(lines) - 1
+	numCols := len(lines[0])
 
-	termbox.SetInputMode(userinterface.InputEsc)
-	err = termbox.Clear(userinterface.ColorDefault, userinterface.ColorDefault)
-	m.AssertNil(err)
-
-	return termbox
-}
-
-func Evolve(s State) State {
-	state := make([][]int, len(s))
-
-	length := len(s[0])
-	for i := range s {
-		state[i] = make([]int, length)
+	state := make([][]bool, numCols)
+	for i := range state {
+		state[i] = make([]bool, numRows)
 	}
 
-	for i := range s {
-		for j, cell := range s[i] {
-			if cell == 1 {
-				neighborCount := s.LiveNeighborCount(i, j)
-				if neighborCount == 2 || neighborCount == 3 {
-					state[i][j] = 1
-				}
-			} else {
-				if s.LiveNeighborCount(i, j) == 3 {
-					state[i][j] = 1
-				}
-			}
+	for i := 0; i < numRows; i++ {
+		for j, char := range lines[i] {
+			state[j][i] = char == '#'
 		}
 	}
 
