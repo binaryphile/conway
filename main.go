@@ -1,47 +1,55 @@
 package main
 
 import (
-	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/hajimehoshi/ebiten/v2"
 	"log"
 	"strings"
 )
 
 const (
-	screenWidth  = 800
-	screenHeight = 600
-	cellSize     = 10
+	width    = 140
+	height   = 90
+	cellSize = 10
 )
 
 func main() {
-	game := NewGame(screenWidth/cellSize, screenHeight/cellSize)
-	game.Initialize(10, 10, StateFromString(heredoc.Doc(`
-		_##_
-		_#_#
-		_#_
-	`)))
+	ebiten.SetWindowSize(width*cellSize, height*cellSize)
 
-	ebiten.SetWindowSize(screenWidth, screenHeight)
+	game := NewGame(width, height)
+
+	initFigure := rPentomino
+	figureWidth, figureHeight := SizeFromString(initFigure)
+
+	leftOffset := int(float64(width-figureWidth) / 2)
+	topOffset := int(float64(height-figureHeight) / 2)
+	game.Initialize(leftOffset, topOffset, StateFromString(initFigure))
+
 	ebiten.SetWindowTitle("Conway's Game of Life")
-	ebiten.SetTPS(2)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }
 
+func SizeFromString(s string) (width, height int) {
+	lines := strings.Split(s, "\n")
+	return len(strings.TrimSpace(lines[1])), len(lines) - 2
+}
+
 func StateFromString(s string) [][]bool {
 	lines := strings.Split(s, "\n")
-	numRows := len(lines) - 1
-	numCols := len(lines[0])
-
-	state := make([][]bool, numCols)
-	for i := range state {
-		state[i] = make([]bool, numRows)
+	lines = lines[1 : len(lines)-1]
+	for i := range lines {
+		lines[i] = strings.TrimSpace(lines[i])
 	}
 
-	for i := 0; i < numRows; i++ {
-		for j, char := range lines[i] {
-			state[j][i] = char == '#'
+	state := make([][]bool, len(lines[0]))
+	for i := range lines[0] {
+		state[i] = make([]bool, len(lines))
+	}
+
+	for i := range lines {
+		for j := range lines[i] {
+			state[j][i] = lines[i][j] == '#'
 		}
 	}
 

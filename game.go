@@ -1,24 +1,24 @@
 package main
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	e "github.com/hajimehoshi/ebiten/v2"
+	u "github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image/color"
-	"math/rand"
-	"time"
 )
 
-type Game struct {
-	board   [][]bool
-	paused  bool
-	started bool
+const slowdownFactor = 5
 
-	debounceInterval time.Duration
-	lastSpace        time.Time
+type Game struct {
+	board           [][]bool
+	slowdownCounter int
 
 	height int
 	width  int
+
+	paused     bool
+	stalePress bool
+	started    bool
 }
 
 func NewGame(width, height int) *Game {
@@ -28,19 +28,18 @@ func NewGame(width, height int) *Game {
 	}
 
 	return &Game{
-		board:   board,
-		paused:  false,
-		started: false,
+		board: board,
+
+		paused:     false,
+		stalePress: false,
+		started:    false,
 
 		height: height,
 		width:  width,
-
-		debounceInterval: 100 * time.Millisecond,
-		lastSpace:        time.Now(),
 	}
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
+func (g *Game) Draw(screen *e.Image) {
 	screen.Clear()
 	for y := range g.board {
 		for x := range g.board[y] {
@@ -51,9 +50,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	if g.paused {
-		ebitenutil.DebugPrint(screen, "Paused")
+		u.DebugPrint(screen, "Paused")
 	} else if !g.started {
-		ebitenutil.DebugPrint(screen, "Press space to start")
+		u.DebugPrint(screen, "Press space to start")
+	}
+}
+
+func (g *Game) Initialize(leftOffset, topOffset int, state [][]bool) {
+	for i := range state {
+		i2 := i + leftOffset
+		for j := range state[i] {
+			j2 := j + topOffset
+			g.board[j2][i2] = state[i][j]
+		}
 	}
 }
 
@@ -62,16 +71,24 @@ func (g *Game) Layout(int, int) (int, int) {
 }
 
 func (g *Game) Update() error {
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		now := time.Now()
-		if now.Sub(g.lastSpace) > g.debounceInterval {
-			g.lastSpace = now
+	if g.slowdownCounter == slowdownFactor {
+		g.slowdownCounter = 0
+	} else {
+		g.slowdownCounter += 1
+		return nil
+	}
+
+	if e.IsKeyPressed(e.KeySpace) {
+		if !g.stalePress {
 			if !g.started {
 				g.started = true
 			} else {
 				g.paused = !g.paused
 			}
+			g.stalePress = true
 		}
+	} else {
+		g.stalePress = false
 	}
 
 	if g.paused || !g.started {
@@ -79,11 +96,8 @@ func (g *Game) Update() error {
 	}
 
 	next := make([][]bool, g.height)
-	for i := range next {
-		next[i] = make([]bool, g.width)
-	}
-
 	for y := range g.board {
+		next[y] = make([]bool, g.width)
 		for x := range g.board[y] {
 			aliveNeighbors := g.countAliveNeighbors(x, y)
 			if g.board[y][x] {
@@ -93,8 +107,8 @@ func (g *Game) Update() error {
 			}
 		}
 	}
-
 	g.board = next
+
 	return nil
 }
 
@@ -105,31 +119,13 @@ func (g *Game) countAliveNeighbors(x, y int) int {
 			if dx == 0 && dy == 0 {
 				continue
 			}
-			nx, ny := x+dx, y+dy
-			if nx >= 0 && nx < g.width && ny >= 0 && ny < g.height {
-				if g.board[ny][nx] {
+			x2, y2 := x+dx, y+dy
+			if x2 >= 0 && x2 < g.width && y2 >= 0 && y2 < g.height {
+				if g.board[y2][x2] {
 					count++
 				}
 			}
 		}
 	}
 	return count
-}
-
-func (g *Game) Initialize(leftOffset, topOffset int, state [][]bool) {
-	for i := range state {
-		translatedI := i + leftOffset
-		for j := range state[i] {
-			translatedJ := j + topOffset
-			g.board[translatedJ][translatedI] = state[i][j]
-		}
-	}
-}
-
-func (g *Game) randomize() {
-	for y := range g.board {
-		for x := range g.board[y] {
-			g.board[y][x] = rand.Intn(2) == 0
-		}
-	}
 }
